@@ -1,8 +1,8 @@
 ﻿using GameBoard;
-using Chest;
+using Chess;
 using System;
 
-namespace ConsoleChest
+namespace ConsoleChess
 {
     class Program
     {

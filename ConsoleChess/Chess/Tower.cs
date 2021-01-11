@@ -1,6 +1,6 @@
 ﻿using GameBoard;
 
-namespace Chest
+namespace Chess
 {
     class Tower : Piece
     {

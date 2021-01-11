@@ -1,7 +1,7 @@
 ﻿using System;
 using GameBoard;
 
-namespace ConsoleChest
+namespace ConsoleChess
 {
     class Screen
     {
