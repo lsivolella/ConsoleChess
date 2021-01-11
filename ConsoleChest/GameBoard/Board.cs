@@ -19,5 +19,13 @@
         {
             return Pieces[line, column];
         }
+
+        public void AddPieceToBoard(Piece piece, Position position)
+        {
+            // Insert the piece at the defined position on the Board Class
+            Pieces[position.Line, position.Column] = piece;
+            // Register the piece's position on the Piece Class
+            piece.Position = position;
+        }
     }
 }

@@ -9,9 +9,9 @@
 
         public Piece() { }
 
-        public Piece(Position position, Color color, Board board)
+        public Piece(Color color, Board board)
         {
-            Position = position;
+            Position = null;
             Color = color;
             MovementQuantity = 0;
             Board = board;
