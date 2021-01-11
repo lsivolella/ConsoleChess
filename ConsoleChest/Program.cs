@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Board;
+using System;
 
 namespace ConsoleChest
 {
@@ -6,7 +7,11 @@ namespace ConsoleChest
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Position position = new Position(3, 4);
+
+            Console.WriteLine(position);
+
+            Console.ReadLine();
         }
     }
 }
