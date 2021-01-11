@@ -1,4 +1,4 @@
-﻿using Board;
+﻿using GameBoard;
 using System;
 
 namespace ConsoleChest
@@ -7,9 +7,9 @@ namespace ConsoleChest
     {
         static void Main(string[] args)
         {
-            Position position = new Position(3, 4);
+            Board board = new Board(8, 8);
 
-            Console.WriteLine(position);
+            Console.WriteLine(board);
 
             Console.ReadLine();
         }
