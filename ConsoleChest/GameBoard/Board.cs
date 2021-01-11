@@ -20,12 +20,39 @@
             return Pieces[line, column];
         }
 
+        public Piece Piece(Position position)
+        {
+            return Pieces[position.Line, position.Column];
+        }
+
+        public bool PositionOccupied(Position position)
+        {
+            ValidatePosition(position);
+            return Piece(position) != null;
+        }
+
         public void AddPieceToBoard(Piece piece, Position position)
         {
+            if (PositionOccupied(position))
+                throw new BoardException("ERROR: Cannot place two Pieces at the same Position.");
             // Insert the piece at the defined position on the Board Class
             Pieces[position.Line, position.Column] = piece;
             // Register the piece's position on the Piece Class
             piece.Position = position;
+        }
+
+        public bool ValidPosition(Position position)
+        {
+            if (position.Line < 0 || position.Line >= Lines
+                || position.Column < 0 || position.Column >= Columns)
+                return false;
+            return true;
+        }
+
+        public void ValidatePosition(Position position)
+        {
+            if (!ValidPosition(position))
+                throw new BoardException("ERROR: Invalid Position detected.");
         }
     }
 }
