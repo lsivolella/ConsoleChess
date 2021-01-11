@@ -17,6 +17,9 @@ namespace ConsoleChess
                 board.AddPieceToBoard(new King(Color.Black, board), new Position(2, 4));
 
                 Screen.PrintBoard(board);
+
+                ChessPosition position = new ChessPosition('c', 7);
+                Console.WriteLine(position.ToPosition());
             }
             catch (BoardException exception)
             {
