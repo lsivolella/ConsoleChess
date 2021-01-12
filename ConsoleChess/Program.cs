@@ -14,7 +14,7 @@ namespace ConsoleChess
 
                 board.AddPieceToBoard(new Tower(Color.Black, board), new Position(0, 0));
                 board.AddPieceToBoard(new Tower(Color.Black, board), new Position(1, 3));
-                board.AddPieceToBoard(new King(Color.Black, board), new Position(2, 4));
+                board.AddPieceToBoard(new King(Color.White, board), new Position(2, 4));
 
                 Screen.PrintBoard(board);
 

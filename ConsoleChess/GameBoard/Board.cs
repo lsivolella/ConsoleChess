@@ -1,5 +1,9 @@
 ﻿namespace GameBoard
 {
+    /// <summary>
+    /// The Board is responsible for controlling the positioning of each piece available on the game.
+    /// Only one entity of the board may exist per match.
+    /// </summary>
     class Board
     {
         public int Lines { get; set; }
@@ -15,11 +19,23 @@
             Pieces = new Piece[Lines, Columns];
         }
 
+        /// <summary>
+        /// Returns the Piece that occupies the given position.
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="column"></param>
+        /// <returns></returns>
         public Piece Piece(int line, int column)
         {
             return Pieces[line, column];
         }
 
+        /// <summary>
+        /// Returns the Piece that occupies the given position.
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="column"></param>
+        /// <returns></returns>
         public Piece Piece(Position position)
         {
             return Pieces[position.Line, position.Column];

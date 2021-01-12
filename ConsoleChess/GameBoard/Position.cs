@@ -1,5 +1,8 @@
 ﻿namespace GameBoard
 {
+    /// <summary>
+    /// The position a piece is located at the board.
+    /// </summary>
     class Position
     {
         public int Line { get; set; }

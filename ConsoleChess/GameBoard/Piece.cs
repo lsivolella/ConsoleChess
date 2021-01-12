@@ -1,5 +1,8 @@
 ﻿namespace GameBoard
 {
+    /// <summary>
+    /// Movable object used on the board.
+    /// </summary>
     class Piece
     {
         public Position Position { get; set; }
