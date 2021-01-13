@@ -47,14 +47,24 @@
             return Piece(position) != null;
         }
 
-        public void AddPieceToBoard(Piece piece, Position position)
+        public void AddPieceToBoard(Piece pieceToAdd, Position position)
         {
             if (PositionOccupied(position))
                 throw new BoardException("ERROR: Cannot place two Pieces at the same Position.");
             // Insert the piece at the defined position on the Board Class
-            Pieces[position.Line, position.Column] = piece;
+            Pieces[position.Line, position.Column] = pieceToAdd;
             // Register the piece's position on the Piece Class
-            piece.Position = position;
+            pieceToAdd.Position = position;
+        }
+
+        public Piece RemovePieceFromBoard(Position position)
+        {
+            if (Piece(position) == null)
+                return null;
+            Piece pieceToRemove = Piece(position);
+            pieceToRemove.Position = null;
+            Pieces[position.Line, position.Column] = null;
+            return pieceToRemove;
         }
 
         public bool ValidPosition(Position position)

@@ -19,5 +19,10 @@
             MovementQuantity = 0;
             Board = board;
         }
+
+        public void IncrementMovementQuantity()
+        {
+            MovementQuantity++;
+        }
     }
 }

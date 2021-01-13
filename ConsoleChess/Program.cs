@@ -10,16 +10,25 @@ namespace ConsoleChess
         {
             try
             {
-                Board board = new Board(8, 8);
+                ChessMatch chessMatch = new ChessMatch();
 
-                board.AddPieceToBoard(new Tower(Color.Black, board), new Position(0, 0));
-                board.AddPieceToBoard(new Tower(Color.Black, board), new Position(1, 3));
-                board.AddPieceToBoard(new King(Color.White, board), new Position(2, 4));
+                while (!chessMatch.MatchIsFinished)
+                {
+                    Console.Clear();
+                    Screen.PrintBoard(chessMatch.Board);
+                    Console.WriteLine();
+                    Console.WriteLine("To move the pieces, enter their ");
+                    Console.WriteLine("current position (ex: a1) on the ");
+                    Console.WriteLine("Origin field and their final");
+                    Console.WriteLine("position on the Destination field.");
+                    Console.WriteLine();
 
-                Screen.PrintBoard(board);
-
-                ChessPosition position = new ChessPosition('c', 7);
-                Console.WriteLine(position.ToPosition());
+                    Console.Write("Origin: ");
+                    Position origin = Screen.ReadChessPosition().ToPosition();
+                    Console.Write("Destination: ");
+                    Position destination = Screen.ReadChessPosition().ToPosition();
+                    chessMatch.ExecuteMovement(origin, destination);
+                }
             }
             catch (BoardException exception)
             {
