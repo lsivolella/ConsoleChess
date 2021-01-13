@@ -3,7 +3,7 @@
     /// <summary>
     /// Movable object used on the board.
     /// </summary>
-    class Piece
+    abstract class Piece
     {
         public Position Position { get; set; }
         public Color Color { get; protected set; }
@@ -24,5 +24,7 @@
         {
             MovementQuantity++;
         }
+
+        public abstract bool[,] PossibleMovements();
     }
 }
