@@ -14,30 +14,43 @@ namespace ConsoleChess
 
                 while (!chessMatch.MatchIsFinished)
                 {
-                    Console.Clear();
-                    Screen.PrintBoard(chessMatch.Board);
-                    Console.WriteLine();
-                    Console.WriteLine("To move the pieces, enter their ");
-                    Console.WriteLine("current position (ex: a1) on the ");
-                    Console.WriteLine("Origin field and their final");
-                    Console.WriteLine("position on the Destination field.");
-                    Console.WriteLine();
+                    try
+                    {
+                        Console.Clear();
+                        Screen.PrintMatch(chessMatch);
 
-                    Console.Write("Origin: ");
-                    Position origin = Screen.ReadChessPosition().ToPosition();
+                        Console.Write("Origin: ");
+                        Position origin = Screen.ReadChessPosition().ToPosition();
+                        chessMatch.ValidateOriginPosition(origin);
 
-                    bool[,] possiblePositions = chessMatch.Board.Piece(origin).PossibleMovements();
+                        bool[,] possiblePositions = chessMatch.Board.Piece(origin).PossibleMovements();
 
-                    Console.Clear();
-                    Screen.PrintBoard(chessMatch.Board, possiblePositions);
+                        Console.Clear();
+                        Screen.PrintBoard(chessMatch.Board, possiblePositions);
 
-                    Console.Write("Destination: ");
-                    Position destination = Screen.ReadChessPosition().ToPosition();
-                    chessMatch.ExecuteMovement(origin, destination);
+                        Console.WriteLine();
+                        Console.Write(Screen.PrintHowToPlay());
+
+                        Console.WriteLine();
+                        Console.WriteLine("Turn #" + chessMatch.Turn);
+                        Console.WriteLine("Awaiting Player: " + chessMatch.CurrentPlayer);
+
+                        Console.Write("Destination: ");
+                        Position destination = Screen.ReadChessPosition().ToPosition();
+                        chessMatch.ExecutePlay(origin, destination);
+                    }
+                    catch (BoardException exception)
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine(exception.Message);
+                        Console.WriteLine("Press enter to try again.");
+                        Console.ReadLine();
+                    }
                 }
             }
             catch (BoardException exception)
             {
+                Console.WriteLine();
                 Console.WriteLine(exception.Message);
             }
             Console.ReadLine();

@@ -25,6 +25,21 @@
             MovementQuantity++;
         }
 
+        public bool PieceCanMove()
+        {
+            bool[,] possiblemovementPossibilitiesMatrix = PossibleMovements();
+
+            for (int i = 0; i < Board.Lines; i++)
+            {
+                for (int j = 0; j < Board.Columns; j++)
+                {
+                    if (possiblemovementPossibilitiesMatrix[i, j])
+                        return true;
+                }
+            }
+            return false;
+        }
+
         public abstract bool[,] PossibleMovements();
     }
 }
