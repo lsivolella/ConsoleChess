@@ -25,6 +25,11 @@
             MovementQuantity++;
         }
 
+        public void DecrementMovementQuantity()
+        {
+            MovementQuantity--;
+        }
+
         public bool PieceCanMove()
         {
             bool[,] possiblemovementPossibilitiesMatrix = PossibleMovements();

@@ -34,6 +34,10 @@ namespace ConsoleChess
                 Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine(chessMatch.CurrentPlayer);
             Console.ForegroundColor = defaultColor;
+            if (chessMatch.Check)
+            {
+                Console.WriteLine("Player in Check!");
+            }
         }
 
         private static void PrintCapturedPieces(ChessMatch chessMatch)
