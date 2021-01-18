@@ -47,6 +47,8 @@ namespace ConsoleChess
                         Console.ReadLine();
                     }
                 }
+                Console.Clear();
+                Screen.PrintMatch(chessMatch);
             }
             catch (BoardException exception)
             {

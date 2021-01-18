@@ -29,14 +29,24 @@ namespace ConsoleChess
 
             Console.WriteLine();
             Console.WriteLine("Turn #" + chessMatch.Turn);
-            Console.Write("Awaiting Player: ");
-            if (chessMatch.CurrentPlayer == Color.Black)
-                Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(chessMatch.CurrentPlayer);
-            Console.ForegroundColor = defaultColor;
-            if (chessMatch.Check)
+
+            if (!chessMatch.MatchIsFinished)
             {
-                Console.WriteLine("Player in Check!");
+                Console.Write("Awaiting Player: ");
+                if (chessMatch.CurrentPlayer == Color.Black)
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine(chessMatch.CurrentPlayer);
+                Console.ForegroundColor = defaultColor;
+                if (chessMatch.IsInCheck)
+                {
+                    Console.WriteLine("Player in Check!");
+                }
+            }
+            else
+            {
+                Console.WriteLine("CHECK MATE!");
+                Console.WriteLine("Winner: " + chessMatch.CurrentPlayer);
+                Console.WriteLine("Congratulations!");
             }
         }
 

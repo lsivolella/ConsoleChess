@@ -7,7 +7,7 @@ namespace Chess
     {
         public Board Board { get; private set; }
         public bool MatchIsFinished { get; private set; }
-        public bool Check { get; private set; }
+        public bool IsInCheck { get; private set; }
         public int Turn { get; private set; }
         public Color CurrentPlayer { get; private set; }
         private HashSet<Piece> piecesInGame;
@@ -17,7 +17,7 @@ namespace Chess
         {
             Board = new Board(8, 8);
             MatchIsFinished = false;
-            Check = false;
+            IsInCheck = false;
             Turn = 1;
             CurrentPlayer = Color.White;
             piecesInGame = new HashSet<Piece>();
@@ -54,14 +54,19 @@ namespace Chess
             if (IsKingInCheck(CurrentPlayer))
             {
                 UndoMovement(origin, destination, capturedPiece);
-                throw new BoardException("You cannot place your King in check. Your play will be undone.");
+                throw new BoardException("You cannot place your own King in check. Your play will be undone.");
             }
             if (IsKingInCheck(FindAdversaryColor(CurrentPlayer)))
-                Check = true;
+                IsInCheck = true;
             else
-                Check = false;
-            Turn++;
-            ChangePlayer();
+                IsInCheck = false;
+            if (IsKingInCheckMate(FindAdversaryColor(CurrentPlayer)))
+                MatchIsFinished = true;
+            else
+            {
+                Turn++;
+                ChangePlayer();
+            }
         }
 
         public void ValidateOriginPosition(Position position)
@@ -113,19 +118,25 @@ namespace Chess
 
         private void PlacePiecesOnBoard()
         {
-            PlaceNewPiece('c', 1, new Tower(Color.White, Board));
-            PlaceNewPiece('c', 2, new Tower(Color.White, Board));
-            PlaceNewPiece('d', 2, new Tower(Color.White, Board));
-            PlaceNewPiece('e', 1, new Tower(Color.White, Board));
-            PlaceNewPiece('e', 2, new Tower(Color.White, Board));
-            PlaceNewPiece('d', 1, new King(Color.White, Board));
+            //PlaceNewPiece('c', 1, new Tower(Color.White, Board));
+            //PlaceNewPiece('c', 2, new Tower(Color.White, Board));
+            //PlaceNewPiece('d', 2, new Tower(Color.White, Board));
+            //PlaceNewPiece('e', 1, new Tower(Color.White, Board));
+            //PlaceNewPiece('e', 2, new Tower(Color.White, Board));
+            //PlaceNewPiece('d', 1, new King(Color.White, Board));
 
-            PlaceNewPiece('c', 7, new Tower(Color.Black, Board));
-            PlaceNewPiece('c', 8, new Tower(Color.Black, Board));
-            PlaceNewPiece('d', 7, new Tower(Color.Black, Board));
-            PlaceNewPiece('e', 7, new Tower(Color.Black, Board));
-            PlaceNewPiece('e', 8, new Tower(Color.Black, Board));
-            PlaceNewPiece('d', 8, new King(Color.Black, Board));
+            //PlaceNewPiece('c', 7, new Tower(Color.Black, Board));
+            //PlaceNewPiece('c', 8, new Tower(Color.Black, Board));
+            //PlaceNewPiece('d', 7, new Tower(Color.Black, Board));
+            //PlaceNewPiece('e', 7, new Tower(Color.Black, Board));
+            //PlaceNewPiece('e', 8, new Tower(Color.Black, Board));
+            //PlaceNewPiece('d', 8, new King(Color.Black, Board));
+
+            PlaceNewPiece('c', 1, new Tower(Color.White, Board));
+            PlaceNewPiece('d', 1, new King(Color.White, Board));
+            PlaceNewPiece('h', 7, new Tower(Color.White, Board));
+            PlaceNewPiece('a', 8, new King(Color.Black, Board));
+            PlaceNewPiece('b', 8, new Tower(Color.Black, Board));
         }
 
         private Color FindAdversaryColor(Color currentPlayerColor)
@@ -159,6 +170,33 @@ namespace Chess
                     return true;
             }
             return false;
+        }
+
+        private bool IsKingInCheckMate(Color color)
+        {
+            if (!IsKingInCheck(color))
+                return false;
+            foreach (Piece piece in PiecesInGame(color))
+            {
+                bool[,] possibleMovementsMatrix = piece.PossibleMovements();
+                for (int i = 0; i < Board.Lines; i++)
+                {
+                    for (int j = 0; j < Board.Columns; j++)
+                    {
+                        if (possibleMovementsMatrix[i, j])
+                        {
+                            Position origin = piece.Position;
+                            Position destination = new Position(i, j);
+                            Piece capturedPiece = ExecuteMovement(origin, destination);
+                            bool isKingInCheck = IsKingInCheck(color);
+                            UndoMovement(origin, destination, capturedPiece);
+                            if (!isKingInCheck)
+                                return false;
+                        }
+                    }
+                }
+            }
+            return true;
         }
     }
 }
