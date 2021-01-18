@@ -37,6 +37,7 @@ namespace ConsoleChess
 
                         Console.Write("Destination: ");
                         Position destination = Screen.ReadChessPosition().ToPosition();
+                        chessMatch.ValidateDestinationPosition(origin, destination);
                         chessMatch.ExecutePlay(origin, destination);
                     }
                     catch (BoardException exception)

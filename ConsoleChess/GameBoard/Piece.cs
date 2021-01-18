@@ -30,19 +30,24 @@
             MovementQuantity--;
         }
 
-        public bool PieceCanMove()
+        public bool CanPieceMove()
         {
-            bool[,] possiblemovementPossibilitiesMatrix = PossibleMovements();
+            bool[,] possibleMovementsMatrix = PossibleMovements();
 
             for (int i = 0; i < Board.Lines; i++)
             {
                 for (int j = 0; j < Board.Columns; j++)
                 {
-                    if (possiblemovementPossibilitiesMatrix[i, j])
+                    if (possibleMovementsMatrix[i, j])
                         return true;
                 }
             }
             return false;
+        }
+
+        public bool CanMoveToDestination(Position position)
+        {
+            return PossibleMovements()[position.Line, position.Column];
         }
 
         public abstract bool[,] PossibleMovements();

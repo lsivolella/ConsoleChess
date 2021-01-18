@@ -75,8 +75,14 @@ namespace Chess
                 throw new BoardException("There are no Pieces at the selected position.");
             if (CurrentPlayer != Board.Piece(position).Color)
                 throw new BoardException("A Player cannot move the adversary's Pieces.");
-            if (!Board.Piece(position).PieceCanMove())
+            if (!Board.Piece(position).CanPieceMove())
                 throw new BoardException("The Piece selected cannot make any moves.");
+        }
+
+        public void ValidateDestinationPosition(Position origin, Position destination)
+        {
+            if (!Board.Piece(origin).CanMoveToDestination(destination))
+                throw new BoardException("Invalid destination. Press enter to try again.");
         }
 
         private void ChangePlayer()
