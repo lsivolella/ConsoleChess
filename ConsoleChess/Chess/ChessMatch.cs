@@ -138,10 +138,11 @@ namespace Chess
             //PlaceNewPiece('e', 8, new Tower(Color.Black, Board));
             //PlaceNewPiece('d', 8, new King(Color.Black, Board));
 
-            PlaceNewPiece('c', 1, new Tower(Color.White, Board));
+            PlaceNewPiece('c', 1, new Queen(Color.White, Board));
             PlaceNewPiece('d', 1, new King(Color.White, Board));
             PlaceNewPiece('h', 7, new Tower(Color.White, Board));
             PlaceNewPiece('a', 8, new King(Color.Black, Board));
+            PlaceNewPiece('a', 7, new Queen(Color.Black, Board));
             PlaceNewPiece('b', 8, new Tower(Color.Black, Board));
         }
 

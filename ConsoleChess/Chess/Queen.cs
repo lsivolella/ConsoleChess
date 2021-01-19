@@ -1,14 +1,15 @@
-﻿using GameBoard;
+﻿
+using GameBoard;
 
 namespace Chess
 {
-    class Tower : Piece
+    class Queen : Piece
     {
-        public Tower(Color color, Board board) : base(color, board) { }
+        public Queen(Color color, Board board) : base(color, board) { }
 
         public override string ToString()
         {
-            return "T";
+            return "Q";
         }
 
         private bool CanMoveToPosition(Position positionOfDestination)
@@ -23,6 +24,16 @@ namespace Chess
             // Instantiate a new position with placeholder values
             Position position = new Position(0, 0);
 
+            // NW of the piece
+            position.DefineValues(Position.Line - 1, Position.Column - 1);
+            while (Board.ValidPosition(position) && CanMoveToPosition(position))
+            {
+                movementPossibilitiesMatrix[position.Line, position.Column] = true;
+                // Forced stop when the Bishop meets an adversary Piece
+                if (Board.Piece(position) != null && Board.Piece(position).Color != Color)
+                    break;
+                position.DefineValues(position.Line - 1, position.Column - 1);
+            }
             // North of the piece
             position.DefineValues(Position.Line - 1, Position.Column);
             while (Board.ValidPosition(position) && CanMoveToPosition(position))
@@ -33,6 +44,15 @@ namespace Chess
                     break;
                 position.Line = position.Line - 1;
             }
+            // NE of the piece
+            position.DefineValues(Position.Line - 1, Position.Column + 1);
+            while (Board.ValidPosition(position) && CanMoveToPosition(position))
+            {
+                movementPossibilitiesMatrix[position.Line, position.Column] = true;
+                if (Board.Piece(position) != null && Board.Piece(position).Color != Color)
+                    break;
+                position.DefineValues(position.Line - 1, position.Column + 1);
+            }
             // East of the piece
             position.DefineValues(Position.Line, Position.Column + 1);
             while (Board.ValidPosition(position) && CanMoveToPosition(position))
@@ -42,6 +62,15 @@ namespace Chess
                     break;
                 position.Column = position.Column + 1;
             }
+            // SE of the piece
+            position.DefineValues(Position.Line + 1, Position.Column + 1);
+            while (Board.ValidPosition(position) && CanMoveToPosition(position))
+            {
+                movementPossibilitiesMatrix[position.Line, position.Column] = true;
+                if (Board.Piece(position) != null && Board.Piece(position).Color != Color)
+                    break;
+                position.DefineValues(position.Line + 1, position.Column + 1);
+            }
             // South of the piece
             position.DefineValues(Position.Line + 1, Position.Column);
             while (Board.ValidPosition(position) && CanMoveToPosition(position))
@@ -50,6 +79,15 @@ namespace Chess
                 if (Board.Piece(position) != null && Board.Piece(position).Color != Color)
                     break;
                 position.Line = position.Line + 1;
+            }
+            // SW of the piece
+            position.DefineValues(Position.Line + 1, Position.Column - 1);
+            while (Board.ValidPosition(position) && CanMoveToPosition(position))
+            {
+                movementPossibilitiesMatrix[position.Line, position.Column] = true;
+                if (Board.Piece(position) != null && Board.Piece(position).Color != Color)
+                    break;
+                position.DefineValues(position.Line + 1, position.Column - 1);
             }
             // West of the piece
             position.DefineValues(Position.Line, Position.Column - 1);
