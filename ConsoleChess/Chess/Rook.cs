@@ -2,13 +2,13 @@
 
 namespace Chess
 {
-    class Tower : Piece
+    class Rook : Piece
     {
-        public Tower(Color color, Board board) : base(color, board) { }
+        public Rook(Color color, Board board) : base(color, board) { }
 
         public override string ToString()
         {
-            return "T";
+            return "R";
         }
 
         private bool CanMoveToPosition(Position positionOfDestination)
@@ -28,7 +28,7 @@ namespace Chess
             while (Board.ValidPosition(position) && CanMoveToPosition(position))
             {
                 movementPossibilitiesMatrix[position.Line, position.Column] = true;
-                // Forced stop when the Tower meets an adversary Piece
+                // Forced stop when the Rook meets an adversary Piece
                 if (Board.Piece(position) != null && Board.Piece(position).Color != Color)
                     break;
                 position.Line = position.Line - 1;
