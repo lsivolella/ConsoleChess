@@ -36,7 +36,7 @@ namespace Chess
                     movementPossibilitiesMatrix[position.Line, position.Column] = true;
                 // North of the piece. Initial movement for a Pawn (moves two places instead of one)
                 position.DefineValues(Position.Line - 2, Position.Column);
-                if (Board.ValidPosition(position) && IsPositionFree(position) && MovementQuantity == 0)
+                if (Board.ValidPosition(position) && IsPositionFree(position) && IsPositionFree(new Position(position.Line + 1, position.Column)) && MovementQuantity == 0)
                     movementPossibilitiesMatrix[position.Line, position.Column] = true;
                 // NW of the piece. Movement for capturing other pieces
                 position.DefineValues(Position.Line - 1, Position.Column - 1);
@@ -55,7 +55,7 @@ namespace Chess
                     movementPossibilitiesMatrix[position.Line, position.Column] = true;
                 // South of the piece. Initial movement for a Pawn (moves two places instead of one)
                 position.DefineValues(Position.Line + 2, Position.Column);
-                if (Board.ValidPosition(position) && IsPositionFree(position) && MovementQuantity == 0)
+                if (Board.ValidPosition(position) && IsPositionFree(position) && IsPositionFree(new Position(position.Line + 1, position.Column)) && MovementQuantity == 0)
                     movementPossibilitiesMatrix[position.Line, position.Column] = true;
                 // SW of the piece. Movement for capturing other pieces
                 position.DefineValues(Position.Line + 1, Position.Column - 1);

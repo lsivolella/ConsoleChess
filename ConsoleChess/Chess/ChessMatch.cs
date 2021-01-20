@@ -33,7 +33,34 @@ namespace Chess
             if (pieceToCapture != null)
                 piecesCaptured.Add(pieceToCapture);
             Board.AddPieceToBoard(pieceToMove, destination);
+            // Special Play - Castling Short
+            ExecuteCastlingShort(pieceToMove, origin, destination);
+            ExecuteCastlingLong(pieceToMove, origin, destination);
             return pieceToCapture;
+        }
+
+        private void ExecuteCastlingShort(Piece pieceToMove, Position origin, Position destination)
+        {
+            if (pieceToMove is King && destination.Column == origin.Column + 2)
+            {
+                Position rookOrigin = new Position(origin.Line, origin.Column + 3);
+                Position rookDestination = new Position(origin.Line, origin.Column + 1);
+                Piece rook = Board.RemovePieceFromBoard(rookOrigin);
+                rook.IncrementMovementQuantity();
+                Board.AddPieceToBoard(rook, rookDestination);
+            }
+        }
+
+        private void ExecuteCastlingLong(Piece pieceToMove, Position origin, Position destination)
+        {
+            if (pieceToMove is King && destination.Column == origin.Column - 2)
+            {
+                Position rookOrigin = new Position(origin.Line, origin.Column - 4);
+                Position rookDestination = new Position(origin.Line, origin.Column - 1);
+                Piece rook = Board.RemovePieceFromBoard(rookOrigin);
+                rook.IncrementMovementQuantity();
+                Board.AddPieceToBoard(rook, rookDestination);
+            }
         }
 
         private void UndoMovement(Position origin, Position destination, Piece capturedPiece)
@@ -45,7 +72,33 @@ namespace Chess
                 Board.AddPieceToBoard(capturedPiece, destination);
                 piecesCaptured.Remove(capturedPiece);
             }
-            Board.AddPieceToBoard(pieceToGoBack, origin);
+            Board.AddPieceToBoard(capturedPiece, origin);
+            UndoCastlingShort(pieceToGoBack, origin, destination);
+            UndoCastlingLong(pieceToGoBack, origin, destination);
+        }
+
+        private void UndoCastlingShort(Piece pieceToGoBack, Position origin, Position destination)
+        {
+            if (pieceToGoBack is King && destination.Column == origin.Column + 2)
+            {
+                Position rookOrigin = new Position(origin.Line, origin.Column + 3);
+                Position rookDestination = new Position(origin.Line, origin.Column + 1);
+                Piece rook = Board.RemovePieceFromBoard(rookDestination);
+                rook.DecrementMovementQuantity();
+                Board.AddPieceToBoard(rook, rookOrigin);
+            }
+        }
+
+        private void UndoCastlingLong(Piece pieceToGoBack, Position origin, Position destination)
+        {
+            if (pieceToGoBack is King && destination.Column == origin.Column - 2)
+            {
+                Position rookOrigin = new Position(origin.Line, origin.Column - 4);
+                Position rookDestination = new Position(origin.Line, origin.Column - 1);
+                Piece rook = Board.RemovePieceFromBoard(rookDestination);
+                rook.DecrementMovementQuantity();
+                Board.AddPieceToBoard(rook, rookOrigin);
+            }
         }
 
         public void ExecutePlay(Position origin, Position destination)
@@ -129,7 +182,7 @@ namespace Chess
             PlaceNewPiece('b', 1, new Knight(Color.White, Board));
             PlaceNewPiece('c', 1, new Bishop(Color.White, Board));
             PlaceNewPiece('d', 1, new Queen(Color.White, Board));
-            PlaceNewPiece('e', 1, new King(Color.White, Board));
+            PlaceNewPiece('e', 1, new King(Color.White, Board, this));
             PlaceNewPiece('f', 1, new Bishop(Color.White, Board));
             PlaceNewPiece('g', 1, new Knight(Color.White, Board));
             PlaceNewPiece('h', 1, new Rook(Color.White, Board));
@@ -143,23 +196,23 @@ namespace Chess
             PlaceNewPiece('g', 2, new Pawn(Color.White, Board));
             PlaceNewPiece('h', 2, new Pawn(Color.White, Board));
             // Black Pieces first line
-            PlaceNewPiece('a', 1, new Rook(Color.Black, Board));
-            PlaceNewPiece('b', 1, new Knight(Color.Black, Board));
-            PlaceNewPiece('c', 1, new Bishop(Color.Black, Board));
-            PlaceNewPiece('d', 1, new Queen(Color.Black, Board));
-            PlaceNewPiece('e', 1, new King(Color.Black, Board));
-            PlaceNewPiece('f', 1, new Bishop(Color.Black, Board));
-            PlaceNewPiece('g', 1, new Knight(Color.Black, Board));
-            PlaceNewPiece('h', 1, new Rook(Color.Black, Board));
+            PlaceNewPiece('a', 8, new Rook(Color.Black, Board));
+            PlaceNewPiece('b', 8, new Knight(Color.Black, Board));
+            PlaceNewPiece('c', 8, new Bishop(Color.Black, Board));
+            PlaceNewPiece('d', 8, new Queen(Color.Black, Board));
+            PlaceNewPiece('e', 8, new King(Color.Black, Board, this));
+            PlaceNewPiece('f', 8, new Bishop(Color.Black, Board));
+            PlaceNewPiece('g', 8, new Knight(Color.Black, Board));
+            PlaceNewPiece('h', 8, new Rook(Color.Black, Board));
             // Black Pieces, second line
-            PlaceNewPiece('a', 2, new Pawn(Color.Black, Board));
-            PlaceNewPiece('b', 2, new Pawn(Color.Black, Board));
-            PlaceNewPiece('c', 2, new Pawn(Color.Black, Board));
-            PlaceNewPiece('d', 2, new Pawn(Color.Black, Board));
-            PlaceNewPiece('e', 2, new Pawn(Color.Black, Board));
-            PlaceNewPiece('f', 2, new Pawn(Color.Black, Board));
-            PlaceNewPiece('g', 2, new Pawn(Color.Black, Board));
-            PlaceNewPiece('h', 2, new Pawn(Color.Black, Board));
+            PlaceNewPiece('a', 7, new Pawn(Color.Black, Board));
+            PlaceNewPiece('b', 7, new Pawn(Color.Black, Board));
+            PlaceNewPiece('c', 7, new Pawn(Color.Black, Board));
+            PlaceNewPiece('d', 7, new Pawn(Color.Black, Board));
+            PlaceNewPiece('e', 7, new Pawn(Color.Black, Board));
+            PlaceNewPiece('f', 7, new Pawn(Color.Black, Board));
+            PlaceNewPiece('g', 7, new Pawn(Color.Black, Board));
+            PlaceNewPiece('h', 7, new Pawn(Color.Black, Board));
 
         }
 

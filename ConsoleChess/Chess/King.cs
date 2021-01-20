@@ -4,7 +4,12 @@ namespace Chess
 {
     class King : Piece
     {
-        public King(Color color, Board board) : base(color, board) { }
+        private ChessMatch chessMatch;
+
+        public King(Color color, Board board, ChessMatch chessMatch) : base(color, board)
+        {
+            this.chessMatch = chessMatch;
+        }
 
         public override string ToString()
         {
@@ -15,6 +20,12 @@ namespace Chess
         {
             Piece potentialPieceAtDestination = Board.Piece(positionOfDestination);
             return potentialPieceAtDestination == null || potentialPieceAtDestination.Color != Color;
+        }
+
+        private bool CanRookParticipateInCastling(Position positionOfDestination)
+        {
+            Piece piece = Board.Piece(positionOfDestination);
+            return piece != null && piece is Rook && piece.Color == Color && piece.MovementQuantity == 0;
         }
 
         public override bool[,] PossibleMovements()
@@ -52,7 +63,7 @@ namespace Chess
             if (Board.ValidPosition(position) && CanMoveToPosition(position))
             {
                 movementPossibilitiesMatrix[position.Line, position.Column] = true;
-            }            
+            }
             // Southwest of the piece
             position.DefineValues(Position.Line + 1, Position.Column - 1);
             if (Board.ValidPosition(position) && CanMoveToPosition(position))
@@ -70,6 +81,33 @@ namespace Chess
             if (Board.ValidPosition(position) && CanMoveToPosition(position))
             {
                 movementPossibilitiesMatrix[position.Line, position.Column] = true;
+            }
+            // # Special Play - Castling
+            if (MovementQuantity == 0 && !chessMatch.IsInCheck)
+            {
+                // Castling Short
+                Position rookPosition1 = new Position(Position.Line, Position.Column + 3);
+                if (CanRookParticipateInCastling(rookPosition1))
+                {
+                    Position position1 = new Position(Position.Line, Position.Column + 1);
+                    Position position2 = new Position(Position.Line, Position.Column + 2);
+                    if (Board.Piece(position1) == null && Board.Piece(position2) == null)
+                    {
+                        movementPossibilitiesMatrix[Position.Line, Position.Column + 2] = true;
+                    }
+                }
+                // Castling Long
+                Position rookPosition2 = new Position(Position.Line, Position.Column - 4);
+                if (CanRookParticipateInCastling(rookPosition2))
+                {
+                    Position position1 = new Position(Position.Line, Position.Column - 1);
+                    Position position2 = new Position(Position.Line, Position.Column - 2);
+                    Position position3 = new Position(Position.Line, Position.Column - 3);
+                    if (Board.Piece(position1) == null && Board.Piece(position2) == null && Board.Piece(position3) == null)
+                    {
+                        movementPossibilitiesMatrix[Position.Line, Position.Column - 2] = true;
+                    }
+                }
             }
 
             return movementPossibilitiesMatrix;
