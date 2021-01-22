@@ -92,21 +92,7 @@ namespace Chess
             // Special Play - Castling Long
             UndoCastlingLong(pieceToGoBack, origin, destination);
             // Special Play - En Passant
-            
-            //UndoEnPassat();
-            // The UndoMovement method returns the captured Pawn to the wrong position after a EnPessant play is undone
-            // The method bellow will take this Pawn and move it from the wrong position to the right position
-            if (pieceToGoBack is Pawn && origin.Column != destination.Column && capturedPiece == VulnerableToEnPassant)
-            {
-                Piece capturedPawn = Board.RemovePieceFromBoard(destination);
-                Position capturedPawnOrigin;
-                if (pieceToGoBack.Color == PieceColor.White)
-                    capturedPawnOrigin = new Position(3, destination.Column);
-                else
-                    capturedPawnOrigin = new Position(4, destination.Column);
-                Board.AddPieceToBoard(capturedPawn, capturedPawnOrigin);
-            }
-            
+            UndoEnPassant(pieceToGoBack, capturedPiece, origin, destination);
         }
 
         private void UndoCastlingShort(Piece pieceToGoBack, Position origin, Position destination)
@@ -133,9 +119,20 @@ namespace Chess
             }
         }
 
-        private void UndoEnPassant()
+        private void UndoEnPassant(Piece pieceToGoBack, Piece capturedPiece, Position origin, Position destination)
         {
-
+            // The UndoMovement method returns the captured Pawn to the wrong position after a EnPessant play is undone
+            // The method bellow will take this Pawn and move it from the wrong position to the right position
+            if (pieceToGoBack is Pawn && origin.Column != destination.Column && capturedPiece == VulnerableToEnPassant)
+            {
+                Piece capturedPawn = Board.RemovePieceFromBoard(destination);
+                Position capturedPawnOrigin;
+                if (pieceToGoBack.Color == PieceColor.White)
+                    capturedPawnOrigin = new Position(3, destination.Column);
+                else
+                    capturedPawnOrigin = new Position(4, destination.Column);
+                Board.AddPieceToBoard(capturedPawn, capturedPawnOrigin);
+            }
         }
 
         public void ExecutePlay(Position origin, Position destination)
@@ -146,6 +143,22 @@ namespace Chess
                 UndoMovement(origin, destination, capturedPiece);
                 throw new BoardException("You cannot place your own King in check. Your play will be undone.");
             }
+
+            // Get a reference for the piece moved in this turn
+            Piece pieceMovedInTheTurn = Board.Piece(destination);
+            // Special Play - Promotion
+            if (pieceMovedInTheTurn is Pawn)
+            {
+                if (pieceMovedInTheTurn.Color == PieceColor.White && destination.Line == 0 || pieceMovedInTheTurn.Color == PieceColor.Black && destination.Line == 7)
+                {
+                    pieceMovedInTheTurn = Board.RemovePieceFromBoard(destination);
+                    piecesInGame.Remove(pieceMovedInTheTurn);
+                    Piece queen = new Queen(pieceMovedInTheTurn.Color, Board);
+                    Board.AddPieceToBoard(queen, destination);
+                    piecesInGame.Add(queen);
+                }
+            }
+
             if (IsKingInCheck(FindAdversaryColor(CurrentPlayer)))
                 IsInCheck = true;
             else
@@ -158,11 +171,9 @@ namespace Chess
                 ChangePlayer();
             }
 
-            // Get a reference for the piece moved in this turn
-            Piece piece = Board.Piece(destination);
             // Special Play - En Passant
-            if (piece is Pawn && destination.Line == origin.Line - 2 || destination.Line == origin.Line + 2)
-                VulnerableToEnPassant = piece;
+            if (pieceMovedInTheTurn is Pawn && destination.Line == origin.Line - 2 || destination.Line == origin.Line + 2)
+                VulnerableToEnPassant = pieceMovedInTheTurn;
             else
                 VulnerableToEnPassant = null;
         }
@@ -222,7 +233,6 @@ namespace Chess
 
         private void PlacePiecesOnBoard()
         {
-            /*
             // White Pieces, first line
             PlaceNewPiece('a', 1, new Rook(PieceColor.White, Board));
             PlaceNewPiece('b', 1, new Knight(PieceColor.White, Board));
@@ -259,16 +269,6 @@ namespace Chess
             PlaceNewPiece('f', 7, new Pawn(PieceColor.Black, Board, this));
             PlaceNewPiece('g', 7, new Pawn(PieceColor.Black, Board, this));
             PlaceNewPiece('h', 7, new Pawn(PieceColor.Black, Board, this));
-            */
-
-            
-            PlaceNewPiece('c', 1, new King(PieceColor.White, Board, this));
-            PlaceNewPiece('c', 2, new Pawn(PieceColor.White, Board, this));
-            PlaceNewPiece('e', 2, new Pawn(PieceColor.White, Board, this));
-            PlaceNewPiece('d', 8, new King(PieceColor.Black, Board, this));
-            PlaceNewPiece('c', 8, new Queen(PieceColor.Black, Board));
-            PlaceNewPiece('b', 7, new Pawn(PieceColor.Black, Board, this));
-            PlaceNewPiece('d', 7, new Pawn(PieceColor.Black, Board, this));
 
         }
 
