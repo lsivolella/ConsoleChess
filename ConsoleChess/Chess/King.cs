@@ -6,7 +6,7 @@ namespace Chess
     {
         private ChessMatch chessMatch;
 
-        public King(Color color, Board board, ChessMatch chessMatch) : base(color, board)
+        public King(PieceColor color, Board board, ChessMatch chessMatch) : base(color, board)
         {
             this.chessMatch = chessMatch;
         }
@@ -24,8 +24,13 @@ namespace Chess
 
         private bool CanRookParticipateInCastling(Position positionOfDestination)
         {
-            Piece piece = Board.Piece(positionOfDestination);
-            return piece != null && piece is Rook && piece.Color == Color && piece.MovementQuantity == 0;
+            if (!Board.ValidPosition(positionOfDestination))
+                return false;
+            else
+            {
+                Piece piece = Board.Piece(positionOfDestination);
+                return piece != null && piece is Rook && piece.Color == Color && piece.MovementQuantity == 0;
+            }
         }
 
         public override bool[,] PossibleMovements()

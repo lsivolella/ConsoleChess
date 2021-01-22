@@ -4,7 +4,12 @@ namespace Chess
 {
     class Pawn : Piece
     {
-        public Pawn(Color color, Board board) : base(color, board) { }
+        private ChessMatch chessMatch;
+
+        public Pawn(PieceColor color, Board board, ChessMatch chessMatch) : base(color, board) 
+        {
+            this.chessMatch = chessMatch;
+        }
 
         public override string ToString()
         {
@@ -28,7 +33,7 @@ namespace Chess
             // Instantiate a new position with placeholder values
             Position position = new Position(0, 0);
 
-            if (Color == Color.White)
+            if (Color == PieceColor.White)
             {
                 // North of the piece. Standard movement of a Pawn
                 position.DefineValues(Position.Line - 1, Position.Column);
@@ -36,7 +41,7 @@ namespace Chess
                     movementPossibilitiesMatrix[position.Line, position.Column] = true;
                 // North of the piece. Initial movement for a Pawn (moves two places instead of one)
                 position.DefineValues(Position.Line - 2, Position.Column);
-                if (Board.ValidPosition(position) && IsPositionFree(position) && IsPositionFree(new Position(position.Line + 1, position.Column)) && MovementQuantity == 0)
+                if (Board.ValidPosition(position) && IsPositionFree(position) && IsPositionFree(new Position(Position.Line - 1, Position.Column)) && MovementQuantity == 0)
                     movementPossibilitiesMatrix[position.Line, position.Column] = true;
                 // NW of the piece. Movement for capturing other pieces
                 position.DefineValues(Position.Line - 1, Position.Column - 1);
@@ -46,6 +51,17 @@ namespace Chess
                 position.DefineValues(Position.Line - 1, Position.Column + 1);
                 if (Board.ValidPosition(position) && IsEnemyAtPosition(position))
                     movementPossibilitiesMatrix[position.Line, position.Column] = true;
+                // Special Play - En Passant
+                // Move the piece to the NW direction and capture the piece at its left or move the piece to the NE direction and capture the piece at its right
+                if (Position.Line == 3)
+                {
+                    Position positionToTheLeft = new Position(Position.Line, Position.Column - 1);
+                    if (Board.ValidPosition(positionToTheLeft) && IsEnemyAtPosition(positionToTheLeft) && Board.Piece(positionToTheLeft) == chessMatch.VulnerableToEnPassant)
+                        movementPossibilitiesMatrix[positionToTheLeft.Line -1, positionToTheLeft.Column] = true;
+                    Position positionToTheRight = new Position(Position.Line, Position.Column + 1);
+                    if (Board.ValidPosition(positionToTheRight) && IsEnemyAtPosition(positionToTheRight) && Board.Piece(positionToTheRight) == chessMatch.VulnerableToEnPassant)
+                        movementPossibilitiesMatrix[positionToTheRight.Line - 1, positionToTheRight.Column] = true;
+                }
             }
             else
             {
@@ -55,7 +71,7 @@ namespace Chess
                     movementPossibilitiesMatrix[position.Line, position.Column] = true;
                 // South of the piece. Initial movement for a Pawn (moves two places instead of one)
                 position.DefineValues(Position.Line + 2, Position.Column);
-                if (Board.ValidPosition(position) && IsPositionFree(position) && IsPositionFree(new Position(position.Line + 1, position.Column)) && MovementQuantity == 0)
+                if (Board.ValidPosition(position) && IsPositionFree(position) && IsPositionFree(new Position(Position.Line + 1, Position.Column)) && MovementQuantity == 0)
                     movementPossibilitiesMatrix[position.Line, position.Column] = true;
                 // SW of the piece. Movement for capturing other pieces
                 position.DefineValues(Position.Line + 1, Position.Column - 1);
@@ -65,6 +81,17 @@ namespace Chess
                 position.DefineValues(Position.Line + 1, Position.Column + 1);
                 if (Board.ValidPosition(position) && IsEnemyAtPosition(position))
                     movementPossibilitiesMatrix[position.Line, position.Column] = true;
+                // Special Play - En Passant
+                // Move the piece to the SW direction and capture the piece at its left or move the piece to the SE direction and capture the piece at its right
+                if (Position.Line == 4)
+                {
+                    Position positionToTheLeft = new Position(Position.Line, Position.Column - 1);
+                    if (Board.ValidPosition(positionToTheLeft) && IsEnemyAtPosition(positionToTheLeft) && Board.Piece(positionToTheLeft) == chessMatch.VulnerableToEnPassant)
+                        movementPossibilitiesMatrix[positionToTheLeft.Line + 1, positionToTheLeft.Column] = true;
+                    Position positionToTheRight = new Position(Position.Line, Position.Column + 1);
+                    if (Board.ValidPosition(positionToTheRight) && IsEnemyAtPosition(positionToTheRight) && Board.Piece(positionToTheRight) == chessMatch.VulnerableToEnPassant)
+                        movementPossibilitiesMatrix[positionToTheRight.Line + 1, positionToTheRight.Column] = true;
+                }
             }
 
             return movementPossibilitiesMatrix;

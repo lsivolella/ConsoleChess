@@ -12,20 +12,20 @@ namespace ConsoleChess
     /// </summary>
     class Screen
     {
-        public static void PrintMatch(ChessMatch chessMatch)
+        public static void PrintMatchOriginPlay(ChessMatch chessMatch)
         {
             ConsoleColor defaultColor = Console.ForegroundColor;
 
             Console.WriteLine("CONSOLE CHESS");
             
             Console.WriteLine();
-            Screen.PrintBoard(chessMatch.Board);
+            PrintBoard(chessMatch.Board);
             
             Console.WriteLine();
             PrintCapturedPieces(chessMatch);
 
             Console.WriteLine();
-            Console.Write(Screen.PrintHowToPlay());
+            Console.Write(PrintHowToPlay());
 
             Console.WriteLine();
             Console.WriteLine("Turn #" + chessMatch.Turn);
@@ -33,10 +33,9 @@ namespace ConsoleChess
             if (!chessMatch.MatchIsFinished)
             {
                 Console.Write("Awaiting Player: ");
-                if (chessMatch.CurrentPlayer == Color.Black)
-                    Console.ForegroundColor = ConsoleColor.Yellow;
+                PrintInPlayerColor(chessMatch, defaultColor);
                 Console.WriteLine(chessMatch.CurrentPlayer);
-                Console.ForegroundColor = defaultColor;
+                ReturnToDefaultColor(defaultColor);
                 if (chessMatch.IsInCheck)
                 {
                     Console.WriteLine("Player in Check!");
@@ -48,6 +47,53 @@ namespace ConsoleChess
                 Console.WriteLine("Winner: " + chessMatch.CurrentPlayer);
                 Console.WriteLine("Congratulations!");
             }
+
+            Console.WriteLine();
+            PrintInPlayerColor(chessMatch, defaultColor);
+            Console.Write("Origin: ");
+            ReturnToDefaultColor(defaultColor);
+        }
+
+        public static void PrintMatchDestinationPlay(ChessMatch chessMatch, bool[,] possiblePositions)
+        {
+            ConsoleColor defaultColor = Console.ForegroundColor;
+
+            Console.WriteLine("CONSOLE CHESS");
+
+            Console.WriteLine();
+            PrintBoard(chessMatch.Board, possiblePositions);
+
+            Console.WriteLine();
+            PrintCapturedPieces(chessMatch);
+
+            Console.WriteLine();
+            Console.Write(PrintHowToPlay());
+
+            Console.WriteLine();
+            Console.WriteLine("Turn #" + chessMatch.Turn);
+
+            Console.Write("Awaiting Player: ");
+            PrintInPlayerColor(chessMatch, defaultColor);
+            Console.WriteLine(chessMatch.CurrentPlayer);
+            ReturnToDefaultColor(defaultColor);
+
+            Console.WriteLine();
+            PrintInPlayerColor(chessMatch, defaultColor);
+            Console.Write("Destination: ");
+            ReturnToDefaultColor(defaultColor);
+        }
+
+        private static void PrintInPlayerColor(ChessMatch chessMatch, ConsoleColor defaultColor)
+        {
+            if (chessMatch.CurrentPlayer == PieceColor.Black)
+                Console.ForegroundColor = ConsoleColor.Yellow;
+            else
+                Console.ForegroundColor = defaultColor;
+        }
+
+        private static void ReturnToDefaultColor(ConsoleColor defaultColor)
+        {
+            Console.ForegroundColor = defaultColor;
         }
 
         private static void PrintCapturedPieces(ChessMatch chessMatch)
@@ -56,12 +102,12 @@ namespace ConsoleChess
 
             Console.WriteLine("Captured Pieces");
             Console.Write("White: ");
-            PrintListOfPieces(chessMatch.CapturedPieces(Color.White));
+            PrintListOfPieces(chessMatch.CapturedPieces(PieceColor.White));
             Console.WriteLine();
 
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.Write("Black: ");
-            PrintListOfPieces(chessMatch.CapturedPieces(Color.Black));
+            PrintListOfPieces(chessMatch.CapturedPieces(PieceColor.Black));
             Console.ForegroundColor = defaultColor;
             Console.WriteLine();
         }
@@ -71,7 +117,7 @@ namespace ConsoleChess
             Console.Write("[");
             foreach (Piece piece in capturedPieces)
             {
-                if (piece.Color == Color.Black) 
+                //if (piece.Color == Color.Black) 
                 Console.Write(piece + " ");
             }
             Console.Write("]");
@@ -128,7 +174,7 @@ namespace ConsoleChess
                 Console.Write("- ");
             else
             {
-                if (piece.Color == Color.White)
+                if (piece.Color == PieceColor.White)
                     Console.Write(piece);
                 else
                 {

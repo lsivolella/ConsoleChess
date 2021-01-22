@@ -9,7 +9,8 @@ namespace Chess
         public bool MatchIsFinished { get; private set; }
         public bool IsInCheck { get; private set; }
         public int Turn { get; private set; }
-        public Color CurrentPlayer { get; private set; }
+        public PieceColor CurrentPlayer { get; private set; }
+        public Piece VulnerableToEnPassant { get; private set; }
         private HashSet<Piece> piecesInGame;
         private HashSet<Piece> piecesCaptured;
 
@@ -19,9 +20,10 @@ namespace Chess
             MatchIsFinished = false;
             IsInCheck = false;
             Turn = 1;
-            CurrentPlayer = Color.White;
+            CurrentPlayer = PieceColor.White;
             piecesInGame = new HashSet<Piece>();
             piecesCaptured = new HashSet<Piece>();
+            VulnerableToEnPassant = null;
             PlacePiecesOnBoard();
         }
 
@@ -34,33 +36,45 @@ namespace Chess
                 piecesCaptured.Add(pieceToCapture);
             Board.AddPieceToBoard(pieceToMove, destination);
             // Special Play - Castling Short
-            ExecuteCastlingShort(pieceToMove, origin, destination);
-            ExecuteCastlingLong(pieceToMove, origin, destination);
+            if (pieceToMove is King && destination.Column == origin.Column + 2)
+                ExecuteCastlingShort(origin, pieceToMove);
+            // Special Play - Castling Long
+            if (pieceToMove is King && destination.Column == origin.Column - 2)
+                ExecuteCastlingLong(origin, pieceToMove);
+            // Special Play - En Passant
+            if (pieceToCapture == null && pieceToMove is Pawn && origin.Column != destination.Column)
+                pieceToCapture = ExecuteEnPassant(destination, pieceToMove, pieceToCapture);
             return pieceToCapture;
         }
 
-        private void ExecuteCastlingShort(Piece pieceToMove, Position origin, Position destination)
+        private void ExecuteCastlingShort(Position origin, Piece pieceToMove)
         {
-            if (pieceToMove is King && destination.Column == origin.Column + 2)
-            {
-                Position rookOrigin = new Position(origin.Line, origin.Column + 3);
-                Position rookDestination = new Position(origin.Line, origin.Column + 1);
-                Piece rook = Board.RemovePieceFromBoard(rookOrigin);
-                rook.IncrementMovementQuantity();
-                Board.AddPieceToBoard(rook, rookDestination);
-            }
+            Position rookOrigin = new Position(origin.Line, origin.Column + 3);
+            Position rookDestination = new Position(origin.Line, origin.Column + 1);
+            Piece rook = Board.RemovePieceFromBoard(rookOrigin);
+            rook.IncrementMovementQuantity();
+            Board.AddPieceToBoard(rook, rookDestination);
         }
 
-        private void ExecuteCastlingLong(Piece pieceToMove, Position origin, Position destination)
+        private void ExecuteCastlingLong(Position origin, Piece pieceToMove)
         {
-            if (pieceToMove is King && destination.Column == origin.Column - 2)
-            {
-                Position rookOrigin = new Position(origin.Line, origin.Column - 4);
-                Position rookDestination = new Position(origin.Line, origin.Column - 1);
-                Piece rook = Board.RemovePieceFromBoard(rookOrigin);
-                rook.IncrementMovementQuantity();
-                Board.AddPieceToBoard(rook, rookDestination);
-            }
+            Position rookOrigin = new Position(origin.Line, origin.Column - 4);
+            Position rookDestination = new Position(origin.Line, origin.Column - 1);
+            Piece rook = Board.RemovePieceFromBoard(rookOrigin);
+            rook.IncrementMovementQuantity();
+            Board.AddPieceToBoard(rook, rookDestination);
+        }
+
+        private Piece ExecuteEnPassant(Position destination, Piece pieceToMove, Piece pieceToCapture)
+        {
+            Position enPassantPosition;
+            if (pieceToMove.Color == PieceColor.White)
+                enPassantPosition = new Position(destination.Line + 1, destination.Column);
+            else
+                enPassantPosition = new Position(destination.Line - 1, destination.Column);
+            pieceToCapture = Board.RemovePieceFromBoard(enPassantPosition);
+            piecesCaptured.Add(pieceToCapture);
+            return pieceToCapture;
         }
 
         private void UndoMovement(Position origin, Position destination, Piece capturedPiece)
@@ -72,9 +86,27 @@ namespace Chess
                 Board.AddPieceToBoard(capturedPiece, destination);
                 piecesCaptured.Remove(capturedPiece);
             }
-            Board.AddPieceToBoard(capturedPiece, origin);
+            Board.AddPieceToBoard(pieceToGoBack, origin);
+            // Special Play - Castling Short
             UndoCastlingShort(pieceToGoBack, origin, destination);
+            // Special Play - Castling Long
             UndoCastlingLong(pieceToGoBack, origin, destination);
+            // Special Play - En Passant
+            
+            //UndoEnPassat();
+            // The UndoMovement method returns the captured Pawn to the wrong position after a EnPessant play is undone
+            // The method bellow will take this Pawn and move it from the wrong position to the right position
+            if (pieceToGoBack is Pawn && origin.Column != destination.Column && capturedPiece == VulnerableToEnPassant)
+            {
+                Piece capturedPawn = Board.RemovePieceFromBoard(destination);
+                Position capturedPawnOrigin;
+                if (pieceToGoBack.Color == PieceColor.White)
+                    capturedPawnOrigin = new Position(3, destination.Column);
+                else
+                    capturedPawnOrigin = new Position(4, destination.Column);
+                Board.AddPieceToBoard(capturedPawn, capturedPawnOrigin);
+            }
+            
         }
 
         private void UndoCastlingShort(Piece pieceToGoBack, Position origin, Position destination)
@@ -101,6 +133,11 @@ namespace Chess
             }
         }
 
+        private void UndoEnPassant()
+        {
+
+        }
+
         public void ExecutePlay(Position origin, Position destination)
         {
             Piece capturedPiece = ExecuteMovement(origin, destination);
@@ -120,6 +157,14 @@ namespace Chess
                 Turn++;
                 ChangePlayer();
             }
+
+            // Get a reference for the piece moved in this turn
+            Piece piece = Board.Piece(destination);
+            // Special Play - En Passant
+            if (piece is Pawn && destination.Line == origin.Line - 2 || destination.Line == origin.Line + 2)
+                VulnerableToEnPassant = piece;
+            else
+                VulnerableToEnPassant = null;
         }
 
         public void ValidateOriginPosition(Position position)
@@ -140,13 +185,13 @@ namespace Chess
 
         private void ChangePlayer()
         {
-            if (CurrentPlayer == Color.White)
-                CurrentPlayer = Color.Black;
+            if (CurrentPlayer == PieceColor.White)
+                CurrentPlayer = PieceColor.Black;
             else
-                CurrentPlayer = Color.White;
+                CurrentPlayer = PieceColor.White;
         }
 
-        public HashSet<Piece> CapturedPieces(Color pieceColor)
+        public HashSet<Piece> CapturedPieces(PieceColor pieceColor)
         {
             HashSet<Piece> auxList = new HashSet<Piece>();
             foreach (Piece piece in piecesCaptured)
@@ -157,7 +202,7 @@ namespace Chess
             return auxList;
         }
 
-        public HashSet<Piece> PiecesInGame(Color pieceColor)
+        public HashSet<Piece> PiecesInGame(PieceColor pieceColor)
         {
             HashSet<Piece> auxList = new HashSet<Piece>();
             foreach (Piece piece in piecesInGame)
@@ -177,54 +222,65 @@ namespace Chess
 
         private void PlacePiecesOnBoard()
         {
+            /*
             // White Pieces, first line
-            PlaceNewPiece('a', 1, new Rook(Color.White, Board));
-            PlaceNewPiece('b', 1, new Knight(Color.White, Board));
-            PlaceNewPiece('c', 1, new Bishop(Color.White, Board));
-            PlaceNewPiece('d', 1, new Queen(Color.White, Board));
-            PlaceNewPiece('e', 1, new King(Color.White, Board, this));
-            PlaceNewPiece('f', 1, new Bishop(Color.White, Board));
-            PlaceNewPiece('g', 1, new Knight(Color.White, Board));
-            PlaceNewPiece('h', 1, new Rook(Color.White, Board));
+            PlaceNewPiece('a', 1, new Rook(PieceColor.White, Board));
+            PlaceNewPiece('b', 1, new Knight(PieceColor.White, Board));
+            PlaceNewPiece('c', 1, new Bishop(PieceColor.White, Board));
+            PlaceNewPiece('d', 1, new Queen(PieceColor.White, Board));
+            PlaceNewPiece('e', 1, new King(PieceColor.White, Board, this));
+            PlaceNewPiece('f', 1, new Bishop(PieceColor.White, Board));
+            PlaceNewPiece('g', 1, new Knight(PieceColor.White, Board));
+            PlaceNewPiece('h', 1, new Rook(PieceColor.White, Board));
             // White Pieces, second line
-            PlaceNewPiece('a', 2, new Pawn(Color.White, Board));
-            PlaceNewPiece('b', 2, new Pawn(Color.White, Board));
-            PlaceNewPiece('c', 2, new Pawn(Color.White, Board));
-            PlaceNewPiece('d', 2, new Pawn(Color.White, Board));
-            PlaceNewPiece('e', 2, new Pawn(Color.White, Board));
-            PlaceNewPiece('f', 2, new Pawn(Color.White, Board));
-            PlaceNewPiece('g', 2, new Pawn(Color.White, Board));
-            PlaceNewPiece('h', 2, new Pawn(Color.White, Board));
+            PlaceNewPiece('a', 2, new Pawn(PieceColor.White, Board, this));
+            PlaceNewPiece('b', 2, new Pawn(PieceColor.White, Board, this));
+            PlaceNewPiece('c', 2, new Pawn(PieceColor.White, Board, this));
+            PlaceNewPiece('d', 2, new Pawn(PieceColor.White, Board, this));
+            PlaceNewPiece('e', 2, new Pawn(PieceColor.White, Board, this));
+            PlaceNewPiece('f', 2, new Pawn(PieceColor.White, Board, this));
+            PlaceNewPiece('g', 2, new Pawn(PieceColor.White, Board, this));
+            PlaceNewPiece('h', 2, new Pawn(PieceColor.White, Board, this));
             // Black Pieces first line
-            PlaceNewPiece('a', 8, new Rook(Color.Black, Board));
-            PlaceNewPiece('b', 8, new Knight(Color.Black, Board));
-            PlaceNewPiece('c', 8, new Bishop(Color.Black, Board));
-            PlaceNewPiece('d', 8, new Queen(Color.Black, Board));
-            PlaceNewPiece('e', 8, new King(Color.Black, Board, this));
-            PlaceNewPiece('f', 8, new Bishop(Color.Black, Board));
-            PlaceNewPiece('g', 8, new Knight(Color.Black, Board));
-            PlaceNewPiece('h', 8, new Rook(Color.Black, Board));
+            PlaceNewPiece('a', 8, new Rook(PieceColor.Black, Board));
+            PlaceNewPiece('b', 8, new Knight(PieceColor.Black, Board));
+            PlaceNewPiece('c', 8, new Bishop(PieceColor.Black, Board));
+            PlaceNewPiece('d', 8, new Queen(PieceColor.Black, Board));
+            PlaceNewPiece('e', 8, new King(PieceColor.Black, Board, this));
+            PlaceNewPiece('f', 8, new Bishop(PieceColor.Black, Board));
+            PlaceNewPiece('g', 8, new Knight(PieceColor.Black, Board));
+            PlaceNewPiece('h', 8, new Rook(PieceColor.Black, Board));
             // Black Pieces, second line
-            PlaceNewPiece('a', 7, new Pawn(Color.Black, Board));
-            PlaceNewPiece('b', 7, new Pawn(Color.Black, Board));
-            PlaceNewPiece('c', 7, new Pawn(Color.Black, Board));
-            PlaceNewPiece('d', 7, new Pawn(Color.Black, Board));
-            PlaceNewPiece('e', 7, new Pawn(Color.Black, Board));
-            PlaceNewPiece('f', 7, new Pawn(Color.Black, Board));
-            PlaceNewPiece('g', 7, new Pawn(Color.Black, Board));
-            PlaceNewPiece('h', 7, new Pawn(Color.Black, Board));
+            PlaceNewPiece('a', 7, new Pawn(PieceColor.Black, Board, this));
+            PlaceNewPiece('b', 7, new Pawn(PieceColor.Black, Board, this));
+            PlaceNewPiece('c', 7, new Pawn(PieceColor.Black, Board, this));
+            PlaceNewPiece('d', 7, new Pawn(PieceColor.Black, Board, this));
+            PlaceNewPiece('e', 7, new Pawn(PieceColor.Black, Board, this));
+            PlaceNewPiece('f', 7, new Pawn(PieceColor.Black, Board, this));
+            PlaceNewPiece('g', 7, new Pawn(PieceColor.Black, Board, this));
+            PlaceNewPiece('h', 7, new Pawn(PieceColor.Black, Board, this));
+            */
+
+            
+            PlaceNewPiece('c', 1, new King(PieceColor.White, Board, this));
+            PlaceNewPiece('c', 2, new Pawn(PieceColor.White, Board, this));
+            PlaceNewPiece('e', 2, new Pawn(PieceColor.White, Board, this));
+            PlaceNewPiece('d', 8, new King(PieceColor.Black, Board, this));
+            PlaceNewPiece('c', 8, new Queen(PieceColor.Black, Board));
+            PlaceNewPiece('b', 7, new Pawn(PieceColor.Black, Board, this));
+            PlaceNewPiece('d', 7, new Pawn(PieceColor.Black, Board, this));
 
         }
 
-        private Color FindAdversaryColor(Color currentPlayerColor)
+        private PieceColor FindAdversaryColor(PieceColor currentPlayerColor)
         {
-            if (currentPlayerColor == Color.White)
-                return Color.Black;
+            if (currentPlayerColor == PieceColor.White)
+                return PieceColor.Black;
             else
-                return Color.White;
+                return PieceColor.White;
         }
 
-        private Piece FindKingOnBoard(Color color)
+        private Piece FindKingOnBoard(PieceColor color)
         {
             foreach (Piece piece in PiecesInGame(color))
             {
@@ -234,11 +290,11 @@ namespace Chess
             return null;
         }
 
-        private bool IsKingInCheck(Color color)
+        private bool IsKingInCheck(PieceColor color)
         {
             Piece adversaryKing = FindKingOnBoard(color);
             if (adversaryKing == null)
-                throw new BoardException("Could not find a " + color + "King on the board.");
+                throw new BoardException("Could not find a " + color + " King on the board.");
 
             foreach (Piece piece in PiecesInGame(FindAdversaryColor(color)))
             {
@@ -249,7 +305,7 @@ namespace Chess
             return false;
         }
 
-        private bool IsKingInCheckMate(Color color)
+        private bool IsKingInCheckMate(PieceColor color)
         {
             if (!IsKingInCheck(color))
                 return false;

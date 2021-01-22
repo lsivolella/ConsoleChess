@@ -1,6 +1,6 @@
 ﻿namespace GameBoard
 {
-    enum Color
+    enum PieceColor
     {
         White,
         Black,

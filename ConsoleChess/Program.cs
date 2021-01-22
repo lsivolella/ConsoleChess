@@ -17,27 +17,19 @@ namespace ConsoleChess
                     try
                     {
                         Console.Clear();
-                        Screen.PrintMatch(chessMatch);
+                        Screen.PrintMatchOriginPlay(chessMatch);
 
-                        Console.Write("Origin: ");
                         Position origin = Screen.ReadChessPosition().ToPosition();
                         chessMatch.ValidateOriginPosition(origin);
 
                         bool[,] possiblePositions = chessMatch.Board.Piece(origin).PossibleMovements();
 
                         Console.Clear();
-                        Screen.PrintBoard(chessMatch.Board, possiblePositions);
+                        Screen.PrintMatchDestinationPlay(chessMatch, possiblePositions);
 
-                        Console.WriteLine();
-                        Console.Write(Screen.PrintHowToPlay());
-
-                        Console.WriteLine();
-                        Console.WriteLine("Turn #" + chessMatch.Turn);
-                        Console.WriteLine("Awaiting Player: " + chessMatch.CurrentPlayer);
-
-                        Console.Write("Destination: ");
                         Position destination = Screen.ReadChessPosition().ToPosition();
                         chessMatch.ValidateDestinationPosition(origin, destination);
+                        
                         chessMatch.ExecutePlay(origin, destination);
                     }
                     catch (BoardException exception)
@@ -49,7 +41,7 @@ namespace ConsoleChess
                     }
                 }
                 Console.Clear();
-                Screen.PrintMatch(chessMatch);
+                Screen.PrintMatchOriginPlay(chessMatch);
             }
             catch (BoardException exception)
             {
